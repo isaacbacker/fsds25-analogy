@@ -167,15 +167,23 @@ class WordEmbeddings:
         relationship_cd = vec_d - vec_c
         
         # Calculate similarity between relationships
-        relationship_similarity = np.dot(relationship_ab, relationship_cd) / (
-            np.linalg.norm(relationship_ab) * np.linalg.norm(relationship_cd)
-        )
+        norm_ab = np.linalg.norm(relationship_ab)
+        norm_cd = np.linalg.norm(relationship_cd)
+        
+        if norm_ab == 0 or norm_cd == 0:
+            raise ValueError("Words are identical in one or both pairs, cannot compute relationship")
+        
+        relationship_similarity = np.dot(relationship_ab, relationship_cd) / (norm_ab * norm_cd)
         
         # Calculate how close word_d is to the ideal answer
         ideal_d = vec_b - vec_a + vec_c
-        predicted_similarity = np.dot(vec_d, ideal_d) / (
-            np.linalg.norm(vec_d) * np.linalg.norm(ideal_d)
-        )
+        norm_d = np.linalg.norm(vec_d)
+        norm_ideal = np.linalg.norm(ideal_d)
+        
+        if norm_d == 0 or norm_ideal == 0:
+            raise ValueError("Cannot compute similarity with zero vector")
+        
+        predicted_similarity = np.dot(vec_d, ideal_d) / (norm_d * norm_ideal)
         
         return {
             "analogy": f"{word_a}:{word_b}::{word_c}:{word_d}",

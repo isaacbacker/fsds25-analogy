@@ -75,7 +75,13 @@ Focus on the most logical and common relationship between the words."""
                 max_tokens=200
             )
             
+            # Validate response structure
+            if not response.choices or len(response.choices) == 0:
+                raise RuntimeError("No response from OpenAI API")
+            
             answer_text = response.choices[0].message.content
+            if answer_text is None:
+                raise RuntimeError("Empty response from OpenAI API")
             
             # Parse the answers from the response
             answers = self._parse_answers(answer_text)
@@ -152,7 +158,15 @@ Keep your explanation to 2-3 sentences."""
                 max_tokens=300
             )
             
-            return response.choices[0].message.content.strip()
+            # Validate response structure
+            if not response.choices or len(response.choices) == 0:
+                raise RuntimeError("No response from OpenAI API")
+            
+            content = response.choices[0].message.content
+            if content is None:
+                raise RuntimeError("Empty response from OpenAI API")
+            
+            return content.strip()
             
         except Exception as e:
             raise RuntimeError(f"Error calling OpenAI API: {e}")
