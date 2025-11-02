@@ -144,6 +144,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Gensim downloaded models
+gensim-data/
+
 # Spyder project settings
 .spyderproject
 .spyproject
