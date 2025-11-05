@@ -24,3 +24,4 @@ multiply,multiplication,divide,division,math
 square,squared,cube,cubed,math
 plus,addition,minus,subtraction,math
 one,first,two,second,ordinal
+inductive,deductive,unsupervised,supervised,programming

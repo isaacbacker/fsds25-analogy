@@ -10,21 +10,44 @@ This project provides tools and datasets for exploring and evaluating word analo
 
 ```
 fsds25-analogy/
-├── data/               # Data files and models
+├── analogy.py          # Main CLI entry point for testing analogies
+├── src/                # Source code modules
+│   ├── __init__.py     # Package initialization
+│   ├── models.py       # Model loading and management
+│   ├── analogy_tests.py # Analogy testing functions
+│   └── utils.py        # Utility functions (download, extract)
+├── data/               # Data files and cached models
 │   ├── analogies.csv   # Standard word analogies dataset
-│   └── models/         # Downloaded word embedding models (created on first download)
+│   └── models/         # Downloaded word embedding models (auto-created)
 ├── output/             # Output files from analysis
 ├── figures/            # Generated figures and visualizations
-├── download_models.py  # Script to download Word2Vec and GloVe models
+├── setup.sh            # Setup script (creates venv, installs deps)
 ├── requirements.txt    # Python dependencies
-└── README.md          # This file
+├── download_models.py  # (Legacy) Manual model downloader
+├── word2vec_analogy.py # (Legacy) Original analogy tester
+└── README.md           # This file
 ```
 
 ## Setup
 
-### 1. Create a Virtual Environment
+### Quick Setup (Recommended)
 
-It's recommended to use a Python virtual environment to manage dependencies:
+Use the provided setup script to automatically create a virtual environment and install dependencies:
+
+```bash
+./setup.sh
+```
+
+Then activate the virtual environment:
+```bash
+source venv/bin/activate
+```
+
+### Manual Setup
+
+Alternatively, set up manually:
+
+#### 1. Create a Virtual Environment
 
 ```bash
 # Create virtual environment
@@ -37,7 +60,7 @@ source venv/bin/activate
 venv\Scripts\activate
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 Install required Python packages:
 
@@ -45,25 +68,11 @@ Install required Python packages:
 pip install -r requirements.txt
 ```
 
-### 3. Download Word Embedding Models
+### Model Downloads
 
-Use the provided downloader script to fetch pre-trained models:
+Models are automatically downloaded on first use via gensim's downloader. No manual download required!
 
-```bash
-# Download both Word2Vec and GloVe models (default: GloVe 100d)
-python download_models.py
-
-# Download only Word2Vec
-python download_models.py --model word2vec
-
-# Download only GloVe with specific dimensions
-python download_models.py --model glove --glove-dim 300
-
-# Specify custom models directory
-python download_models.py --models-dir /path/to/models
-```
-
-**Note:** Models are large files (>1GB). Ensure you have sufficient disk space and a stable internet connection.
+The first time you run the analogy tool, it will download the Word2Vec model (~1.6 GB) automatically.
 
 ## Available Models
 
@@ -98,41 +107,60 @@ Example: `man,woman,king,queen,gender`
 
 ## Usage
 
-### Loading Models
+### Quick Start
 
-```python
-from gensim.models import KeyedVectors
+Run the default analogy test suite:
 
-# Load Word2Vec model
-word2vec_model = KeyedVectors.load_word2vec_format(
-    'data/models/GoogleNews-vectors-negative300.bin',
-    binary=True
-)
-
-# Load GloVe model
-glove_model = KeyedVectors.load_word2vec_format(
-    'data/models/glove.6B.100d.txt',
-    binary=False,
-    no_header=True
-)
+```bash
+python analogy.py
 ```
 
-### Testing Analogies
+This will load the Word2Vec model and test several classic analogies like "man:woman::king:queen".
 
-```python
-# Test an analogy: man is to woman as king is to ?
-result = model.most_similar(positive=['woman', 'king'], negative=['man'], topn=1)
-print(result)  # Should return 'queen' with high similarity
+### CLI Options
+
+```bash
+# Test a specific analogy
+python analogy.py --test man woman king queen
+
+# Explore nearest neighbors of a word
+python analogy.py --neighbors king --top 20
+
+# Custom vector arithmetic
+python analogy.py --arithmetic --positive king woman --negative man
+
+# Use GloVe model instead of Word2Vec
+python analogy.py --model glove --glove-dim 100
+
+# Use a custom model file
+python analogy.py --custom-model path/to/model.bin --binary
+
+# Show more results
+python analogy.py --top 20 --search-space 100000
 ```
 
-### Loading the Analogies Dataset
+### Python API Usage
+
+You can also use the modules directly in your Python code:
 
 ```python
-import pandas as pd
+from src.models import ModelManager
+from src.analogy_tests import test_analogy, run_analogy_test_suite, print_test_summary
 
-# Load analogies
-analogies = pd.read_csv('data/analogies.csv')
-print(analogies.head())
+# Load a model
+manager = ModelManager()
+model = manager.load_word2vec_google_news()
+
+# Test a single analogy
+test_analogy(model, "man", "woman", "king", "queen")
+
+# Run full test suite
+results = run_analogy_test_suite(model)
+print_test_summary(results)
+
+# Explore nearest neighbors
+from src.analogy_tests import explore_nearest_neighbors
+explore_nearest_neighbors(model, "king", n=10)
 ```
 
 ## Dependencies
@@ -140,10 +168,20 @@ print(analogies.head())
 - **numpy** (>=1.21.0): Numerical computing
 - **pandas** (>=1.3.0): Data manipulation and analysis
 - **gensim** (>=4.0.0): Word embedding models and similarity operations
-- **requests** (>=2.26.0): HTTP library for downloading models
-- **tqdm** (>=4.62.0): Progress bars for downloads
+- **requests** (>=2.26.0): HTTP library for downloads
+- **tqdm** (>=4.62.0): Progress bars
 - **scikit-learn** (>=1.0.0): Machine learning utilities
 - **matplotlib** (>=3.4.0): Plotting and visualization
+- **scipy** (>=1.7.0): Scientific computing (for distance calculations)
+
+## Legacy Files
+
+The project has been refactored for better organization. The following files are kept for reference but are no longer the primary entry points:
+
+- `download_models.py`: Original manual model downloader (models now auto-download via gensim)
+- `word2vec_analogy.py`: Original analogy testing script (replaced by `analogy.py` with modular `src/` package)
+
+You can still use these files if needed, but `analogy.py` is now the recommended entry point.
 
 ## Contributing
 
