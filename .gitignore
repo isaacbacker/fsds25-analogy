@@ -218,3 +218,6 @@ output/*
 !output/.gitkeep
 figures/*
 !figures/.gitkeep
+
+# Mac junk
+.DS_store
