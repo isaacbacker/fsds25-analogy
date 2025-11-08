@@ -15,7 +15,11 @@ from src.analogy_tests import (
     run_analogy_test_suite,
     print_test_summary,
 )
+#Twitter model
+#model = api.load("glove-twitter-200")
+
+#Original word2vec model
 model = api.load("word2vec-google-news-300")
 
-results = run_analogy_test_suite(model)
+results = run_analogy_test_suite(model, csv_path='data/analogies.csv')
 print_test_summary(results)

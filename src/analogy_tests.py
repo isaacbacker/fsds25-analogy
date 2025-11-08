@@ -8,6 +8,7 @@ word embedding models, examining vector arithmetic behavior.
 
 import numpy as np
 from scipy.spatial.distance import cosine
+import pandas as pd
 
 
 def test_analogy(model, word_a, word_b, word_c, target_word, top_n=10, search_space=50000):
@@ -96,8 +97,26 @@ def test_analogy(model, word_a, word_b, word_c, target_word, top_n=10, search_sp
         print(f"Error: Word not found in vocabulary: {e}")
         return None, None
 
+def load_analogies_from_csv(filepath='data/analogies.csv'):
+    """
+    Load analogies from a CSV file.
+    
+    Args:
+        filepath: Path to the CSV file
+        
+    Returns:
+        list: List of tuples (word1, word2, word3, word4)
+    """
+    df = pd.read_csv(filepath)
+    df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+    
+    analogies = []
+    for _, row in df.iterrows():
+        analogies.append((row['word1'], row['word2'], row['word3'], row['word4']))
+    
+    return analogies
 
-def run_analogy_test_suite(model, test_cases=None):
+def run_analogy_test_suite(model, test_cases=None, csv_path=None):
     """
     Run multiple analogy tests to examine vector arithmetic behavior.
     
@@ -109,7 +128,10 @@ def run_analogy_test_suite(model, test_cases=None):
     Returns:
         dict: Results for each test case with neighbors and target rank
     """
-    if test_cases is None:
+    if csv_path:
+        # Load from CSV
+        test_cases = load_analogies_from_csv(csv_path)
+    elif test_cases is None:
         # Default test cases
         test_cases = [
             ("man", "woman", "king", "queen"),
@@ -139,6 +161,8 @@ def run_analogy_test_suite(model, test_cases=None):
         print("-" * 70)
     
     return results
+
+
 
 
 def print_test_summary(results):
