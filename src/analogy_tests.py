@@ -120,6 +120,7 @@ def run_analogy_test_suite(model, test_cases=None):
             ("Tokyo", "Japan", "Paris", "France"),
             ("big", "bigger", "small", "smaller"),
             ("Athens", "Greece", "Berlin", "Germany"),
+            ("Beauty", "Smart", "Ugly", "Dumb")
         ]
     
     results = {}
