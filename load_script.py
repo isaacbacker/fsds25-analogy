@@ -15,13 +15,14 @@ from src.analogy_tests import (
     run_analogy_test_suite,
     print_test_summary,
 )
-#Twitter model
+
+#Twitter model (uncommment below to run)
 #model = api.load("glove-twitter-200")
 
-#Original word2vec model
+#Original word2vec model (uncomment below to run)
 #model = api.load("word2vec-google-news-300")
 
-#Oodern fasttext model
+#fasttext model (uncomment below to run)
 model = api.load("fasttext-wiki-news-subwords-300")
 
 
