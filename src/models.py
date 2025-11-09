@@ -150,6 +150,52 @@ class ModelManager:
         
         return model
     
+    def load_fasttext_wiki_news(self):
+        """
+        Load fastText English word vectors (wiki-news-subwords-300) using gensim downloader.
+
+        This model:
+            - Is 300-dimensional
+            - Uses subword information (handles OOV words better than word2vec)
+            - Is a good modern successor to word2vec-google-news-300 for analogies.
+
+        Returns:
+            Loaded fastText model (KeyedVectors)
+        """
+        model_name = 'fasttext-wiki-news-subwords-300'
+
+        if model_name in self._models:
+            print(f"Using cached model: {model_name}")
+            return self._models[model_name]
+
+        print(f"Loading fastText wiki-news-subwords model...")
+        print(f"Model: {model_name}")
+        print("This may take a few minutes on first download...")
+
+        # Ensure cache is initialized before loading
+        try:
+            api.info()
+        except (ValueError, FileNotFoundError) as e:
+            raise RuntimeError(
+                "Failed to initialize gensim cache. Please ensure you have internet "
+                "connectivity. Gensim needs to download model information file. "
+                "If the problem persists, try deleting ~/gensim-data and running again. "
+                f"Original error: {e}"
+            )
+
+        # Download and load the model using gensim's downloader
+        model = api.load(model_name)
+
+        print(f"✓ Model loaded successfully!")
+        print(f"  Vocabulary size: {len(model.index_to_key):,} words")
+        print(f"  Vector dimensions: {model.vector_size}")
+
+        # Cache the model
+        self._models[model_name] = model
+
+        return model
+
+    
     def load_glove(self, dimension=100):
         """
         Load GloVe model using gensim downloader.
@@ -234,6 +280,8 @@ class ModelManager:
         print("Available models through gensim downloader:")
         print("\nWord2Vec models:")
         print("  - word2vec-google-news-300")
+        print("\nFastText models:")
+        print("  - fasttext-wiki-news-subwords-300")
         print("\nGloVe models:")
         print("  - glove-wiki-gigaword-25")
         print("  - glove-wiki-gigaword-50")
